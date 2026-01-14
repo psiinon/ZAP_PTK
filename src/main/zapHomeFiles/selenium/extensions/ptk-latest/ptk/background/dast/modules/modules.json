@@ -1,0 +1,1312 @@
+{
+  "schema": "ptk-modules-v1",
+  "engine": "DAST",
+  "version": 1,
+  "modules": [
+    {
+      "id": "sql_injection",
+      "type": "active",
+      "async": true,
+      "name": "SQL Injection",
+      "metadata": {
+        "description": "A SQL injection attack consists of insertion or injection of a SQL query via the input data from the client to the application. A successful SQL injection exploit can read sensitive data from the database, modify database data (Insert/Update/Delete), execute administration operations on the database (such as shutdown the DBMS), recover the content of a given file present on the DBMS file system and in some cases issue commands to the operating system. SQL injection attacks are a type of injection attack, in which SQL commands are injected into data-plane input in order to affect the execution of predefined SQL commands.",
+        "recommendation": "<p> <a target=\"_blank\" href=\"https://www.owasp.org/index.php/SQL_Injection_Prevention_Cheat_Sheet\"> SQL Injection</a> flaws are introduced when software developers create dynamic database queries that include user supplied input.\r\n<p>\r\nPrimary Defenses:\r\n<ul>\r\n<li>Use of Prepared Statements (Parameterized Queries)<p>\r\nParameterized queries force the developer to first define all the SQL code, and then pass in each parameter to the query later. This coding style allows the database to distinguish between code and data, regardless of what user input is supplied.\r\n\r\nPrepared statements ensure that an attacker is not able to change the intent of a query, even if SQL commands are inserted by an attacker.\r\n\r\n<li>Use of Stored Procedures<p>\r\n\r\nStored procedures have the same effect as the use of prepared statements when implemented safely* which is the norm for most stored procedure languages. They require the developer to just build SQL statements with parameters which are automatically parameterized unless the developer does something largely out of the norm. The difference between prepared statements and stored procedures is that the SQL code for a stored procedure is defined and stored in the database itself, and then called from the application. Both of these techniques have the same effectiveness in preventing SQL injection so your organization should choose which approach makes the most sense for you.\r\n\r\n<li>Escaping all User Supplied Input<p>\r\n\r\nThis technique is to escape user input before putting it in a query. However, this methodology is frail compared to using parameterized queries and we cannot guarantee it will prevent all SQL Injection in all situations. This technique should only be used, with caution, to retrofit legacy code in a cost effective way. Applications built from scratch, or applications requiring low risk tolerance should be built or re-written using parameterized queries.<p>\r\nEach DBMS supports one or more character escaping schemes specific to certain kinds of queries. If you then escape all user supplied input using the proper escaping scheme for the database you are using, the DBMS will not confuse that input with SQL code written by the developer, thus avoiding any possible SQL injection vulnerabilities.\r\n\r\nFull details on <a target=\"_blank\" href=\"https://www.owasp.org/index.php/ESAPI\">ESAPI are available at OWASP.</a>\r\n\r\n</ul>\r\nAdditional Defenses:\r\n<ul>\r\n<li>Least Privilege<p>\r\n\r\nTo minimize the potential damage of a successful SQL injection attack, you should minimize the privileges assigned to every database account in your environment. Do not assign DBA or admin type access rights to your application accounts. We understand that this is easy, and everything just 'works' when you do it this way, but it is very dangerous. Start from the ground up to determine what access rights your application accounts require, rather than trying to figure out what access rights you need to take away. Make sure that accounts that only need read access are only granted read access to the tables they need access to. If an account only needs access to portions of a table, consider creating a view that limits access to that portion of the data and assigning the account access to the view instead, rather than the underlying table. Rarely, if ever, grant create or delete access to database accounts.\r\n\r\n<li>Allow List Input Validation<p>\r\nInput validation can be used to detect unauthorized input before it is passed to the SQL query. For more information please see the <a target=\"_blank\" href=\"https://www.owasp.org/index.php/Input_Validation_Cheat_Sheet\">OWASP Input Validation Cheat Sheet</a>. Proceed with caution here. Validated data is not necessarily safe to insert into SQL queries via string building. \r\n</ul>\r\n</li>\r\n</ul>",
+        "links": {
+          "OWASP": "https://owasp.org/www-community/attacks/SQL_Injection",
+          "CWE": "https://cwe.mitre.org/data/definitions/89.html"
+        },
+        "severity": "high",
+        "unique": true,
+        "regex": "(\\]\\[(DB2|ODBC|OleDb|Oracle|SqlServer|MySQL)|mysqli?_fetch_|not a valid MySQL|not a legal PLSQL identifer|mysqli?_connect\\(\\)|(SELECT\\s+[^:>]+\\sFROM\\s+[^:>]+\\sWHERE\\s+)|(at\\s[[:alnum:]\\\\/\\._]+\\sline\\s\\d+)|ociparse\\(\\):|must be a syntactically valid variable|CFSQLTYPE|Unknown column ['`]|Microsoft OLE DB Provider for SQL|SQL QUERY FAILURE:|Syntax error.{1,50}in query|ORA-01722:|PostgreSQL query failed:|nested\\s+exception\\s+is\\s+com.microsoft.sqlserver.jdbc.SQLServerException|Could\\s+not\\s+find\\s+stored\\s+procedure|uncategorized\\s+SQLException\\s+for\\s+SQL|You\\s+have\\s+an\\s+error\\s+in\\s+your\\s+SQL\\s+syntax|Unclosed\\s+quotation\\s+mark|(quoted|terminated)[ \r\n]+.{1,100}(quoted|terminated)|sql syntax error|Syntax\\s+error\\s+in\\s+string\\s+in\\s+query\\s+expression\\s+column|Syntax error.{1,50}column|java\\.sql\\.SQLSyntaxErrorException|dao\\.EmptyResultDataAccessException|System\\.Data\\.OleDb\\.OleDbException|insert\\s+into\\s+['`][^\\s]+|database\\s+error|dberror|SqlClient.SqlException).{0,70}|call[ ]+to[ ]+a[ ]+member[ ]+function[ ]+fetch_assoc\\(\\)[ ]+.{0,100}|All[ ]+queries[ ]+combined[ ]+using[ ]+a[ ]+UNION,[ ]+INTERSECT[ ]+or[ ]+EXCEPT.{0,70}|(SQLITE_|sqlite3\\.Operational)ERROR.{0,70}",
+        "category": "sql_injection",
+        "owasp": "A03:2021-Injection",
+        "cwe": "CWE-89",
+        "tags": ["dast", "injection", "sql"]
+      },
+      "attacks": [
+        {
+          "id": "sqlinjection_1",
+          "name": "SQL Injection - Single Quote (before)",
+          "action": {
+            "params": [
+              { "value": "'", "position": "before", "operation": "add" }
+            ]
+          },
+          "validation": {
+            "rule": {
+              "regex": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            },
+            "proof": {
+              "proof": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "sqlinjection_3",
+          "name": "SQL Injection - Double Quote (before)",
+          "action": {
+            "params": [
+              { "value": "\"", "position": "before", "operation": "add" }
+            ]
+          },
+          "validation": {
+            "rule": {
+              "regex": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            },
+            "proof": {
+              "proof": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "sqlinjection_2",
+          "name": "SQL Injection - Single Quote (after)",
+          "action": {
+            "params": [
+              { "value": "'", "position": "after", "operation": "add" }
+            ]
+          },
+          "validation": {
+            "rule": {
+              "regex": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            },
+            "proof": {
+              "proof": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "sqlinjection_4",
+          "name": "SQL Injection - Double Quote (after)",
+          "action": {
+            "params": [
+              { "value": "\"", "position": "after", "operation": "add" }
+            ]
+          },
+          "validation": {
+            "rule": {
+              "regex": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            },
+            "proof": {
+              "proof": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            }
+          }
+        }
+      ],
+      "vulnId": "sql_injection"
+    },
+    {
+      "id": "os_command_injection",
+      "type": "active",
+      "async": true,
+      "name": "OS command injection",
+      "metadata": {
+        "description": "OS command injection (also known as shell injection) is a web security vulnerability that allows an attacker to execute arbitrary operating system (OS) commands on the server that is running an application, and typically fully compromise the application and all its data.",
+        "recommendation": "<p>Careful handling of all user input is crucial.</p>\r\n<ul>\r\n\t<li>Design: If at all possible, use library calls rather than external processes to recreate the desired functionality.</li>\r\n\t<li>Implementation: Ensure that all external commands called from the program are statically created, or - if they must take input from a user - that the input and final line generated are vigorously allow-list checked.</li>\r\n\t<li>Run time: Run time policy enforcement may be used in an allow-list fashion to prevent use of any non-sanctioned commands.</li>\r\n</ul>",
+        "links": {
+          "OWASP": "https://owasp.org/www-community/attacks/Command_Injection",
+          "CWE": "https://cwe.mitre.org/data/definitions/78.html"
+        },
+        "severity": "high",
+        "unique": true,
+        "category": "command_injection",
+        "owasp": "A03:2021-Injection",
+        "cwe": "CWE-78",
+        "tags": ["dast", "command", "injection"]
+      },
+      "attacks": [
+        {
+          "id": "oscommand_1",
+          "name": "OS Command Injection - Unix File (cat passwd)",
+          "regex": "\broot:.{0,20}:\\d+:\\d+:.{0,60}:|Exception: Could not find a part of the path|Exception: Could not find file",
+          "action": {
+            "params": [
+              {
+                "value": "|/bin/cat /etc/passwd",
+                "position": "after",
+                "operation": "add"
+              }
+            ]
+          },
+          "validation": {
+            "rule": {
+              "regex": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            },
+            "proof": {
+              "proof": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            }
+          }
+        }
+      ],
+      "vulnId": "os_command_injection"
+    },
+    {
+      "id": "xss",
+      "type": "active",
+      "async": true,
+      "name": "Reflected Cross-Site Scripting (XSS)",
+      "metadata": {
+        "description": "Reflected Cross-site Scripting (XSS) is another name for non-persistent XSS, where the attack doesn't load with the vulnerable web application but is originated by the victim loading the offending URI. In this article we will see some ways to test a web application for this kind of vulnerability.",
+        "recommendation": "<p>Reflected XSS attacks are the most frequent type of XSS attacks found nowadays.</p><p>When a web application is vulnerable to this type of attack, it will pass unvalidated input sent through requests to the client. Reflected attacks are delivered to the victim in various ways, such as in an e-mail message, or through some specially crafted URI. When a user is tricked into clicking on the malicious link, the injected code travels to the vulnerable web site, which reflects the attack back to the user\\u2019s browser. The browser then executes the offending code because it came from a \"trusted\" server.</p>\r\n          <p>Commonly the attacker's code is written in the Javascript language, but other scripting languages are also used, e.g., ActionScript and VBScript.</p>\r\n          <p>Attackers typically leverage these vulnerabilities to install key loggers, steal victim cookies, perform clipboard theft, and change the content of the page (e.g. download links).</p>\r\n          <p>To remediate against reflected XSS vulnerabilities, strict filtering of HTML character encodings must be adhered to. In some cases, the web application may not be filtering some character encodings. For example, it may filter out \"&lt;script&gt;\", but might not filter \"%3Cscript%3E\" which simply includes another encoding of tags. A nice tool for testing character encodings is OWASP's CAL9000.</p>\r\n          <p>Filtering of all information sent to the server via form POST/GET and URL query parameters with a particular emphasis on filtering out HTML-specific characters is advised.</p>",
+        "links": {
+          "OWASP": "https://owasp.org/www-community/attacks/xss/",
+          "CWE": "https://cwe.mitre.org/data/definitions/79.html"
+        },
+        "severity": "high",
+        "unique": true,
+        "category": "xss",
+        "owasp": "A03:2021-Injection",
+        "cwe": "CWE-79",
+        "tags": ["dast", "xss", "dom"]
+      },
+      "attacks": [
+        {
+          "id": "xss_1",
+          "name": "XSS - Unfiltered <script> tag",
+          "regex": "<script>alert\\(ptk_xss_1\\)\\s*<\\/script>",
+          "action": {
+            "params": [
+              {
+                "value": "<script>alert(ptk_xss_1)</script>",
+                "position": "after",
+                "operation": "add"
+              }
+            ]
+          },
+          "validation": {
+            "rule": {
+              "regex": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            },
+            "proof": {
+              "proof": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "xss_2",
+          "name": "XSS - Script tag after noscript tag",
+          "regex": "<\\/noscript><script>alert\\(ptk_xss_2\\)\\s*<\\/script>",
+          "action": {
+            "params": [
+              {
+                "value": "</noscript><script>alert(ptk_xss_2)</script>",
+                "position": "after",
+                "operation": "add"
+              }
+            ]
+          },
+          "validation": {
+            "rule": {
+              "regex": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            },
+            "proof": {
+              "proof": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "xss_3",
+          "name": "XSS - Svg tag with animation event",
+          "regex": "<svg><animate onbegin=alert\\(ptk_xss_3\\) attributeName=x dur=1s>",
+          "action": {
+            "params": [
+              {
+                "value": "<svg><animate onbegin=alert(ptk_xss_3) attributeName=x dur=1s>",
+                "position": "after",
+                "operation": "add"
+              }
+            ]
+          },
+          "validation": {
+            "rule": {
+              "regex": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            },
+            "proof": {
+              "proof": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "xss_4",
+          "name": "XSS - Img onerror",
+          "regex": "<img src=x onerror=window.postMessage\\({\"ptk\":\"%%random%%\"}\\)>",
+          "action": {
+            "random": "%%random%%",
+            "params": [
+              {
+                "value": "<img src=x onerror=window.postMessage({\"ptk\":\"%%random%%\"})>",
+                "position": "before",
+                "operation": "add"
+              }
+            ]
+          },
+          "validation": {
+            "rule": {
+              "regex": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            },
+            "proof": {
+              "proof": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "xss_5",
+          "name": "XSS - Img onerror",
+          "regex": "<img src=x onerror=window.postMessage\\({\"ptk\":\"%%random%%\"}\\)>",
+          "action": {
+            "random": "%%random%%",
+            "params": [
+              {
+                "value": "<><img src=x onerror=window.postMessage({\"ptk\":\"%%random%%\"})>",
+                "position": "before",
+                "operation": "add"
+              }
+            ]
+          },
+          "validation": {
+            "rule": {
+              "regex": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            },
+            "proof": {
+              "proof": [
+                { "var": "attack.response.body" },
+                { "var": "attack.metadata.regex" }
+              ]
+            }
+          }
+        }
+      ],
+      "vulnId": "dom_xss"
+    },
+    {
+      "id": "jwt_injection",
+      "type": "active",
+      "async": true,
+      "name": "JSON Web Token attacks",
+      "metadata": {
+        "description": "This attack occurs when an attacker alters the token and changes the hashing algorithm to indicate, through the none keyword, that the integrity of the token has already been verified",
+        "recommendation": "<ul>\r\n  <li>Use a secure and up to date library to handle JWTs.</li>\r\n  <li>Ensure that the signature is valid, and that it is using the expected algorithm.</li>\r\n  <li>Use a strong HMAC key or a unique private key to sign them.</li>\r\n  <li>Ensure that there is no sensitive information exposed in the payload.</li>\r\n  <li>Ensure that JWTs are securely stored and transmitted.</li>\r\n  <li>See the <a href=\"https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html\">OWASP JSON Web Tokens Cheat Sheet</a>.</li>\r\n</ul>",
+        "links": {
+          "OWASP": "https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html",
+          "CWE": "https://cwe.mitre.org/data/definitions/345.html"
+        },
+        "severity": "high",
+        "unique": false,
+        "regex": "(ey[a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_=]+)\\.([A-Za-z0-9_-]{2,})",
+        "category": "jwt_misuse",
+        "owasp": "A07:2021-Identification and Authentication Failures",
+        "cwe": "CWE-345",
+        "tags": ["dast", "jwt", "token"]
+      },
+      "attacks": [
+        {
+          "id": "jwt_1",
+          "name": "JWT None Algorithm (Cookie)",
+          "atomic": false,
+          "description": "Replace JWT inside cookie values with a 'none' algorithm header and no signature.",
+          "condition": {
+            "and": [
+              { "==": [{ "var": "original.response.statusCode" }, 200] },
+              {
+                "or": [
+                  {
+                    "regex": [
+                      { "var": "original.request.cookies" },
+                      { "var": "attack.metadata.regex" }
+                    ]
+                  },
+                  {
+                    "regex": [
+                      { "var": "original.request.headers" },
+                      { "var": "attack.metadata.regex" }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "action": {
+            "cookies": [
+              {
+                "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.$2.",
+                "regex": "(ey[a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_=]+)\\.([A-Za-z0-9_-]{2,})"
+              }
+            ]
+          },
+          "validation": {
+            "rule": {
+              "and": [
+                { "==": [{ "var": "attack.response.statusCode" }, 200] },
+                {
+                  "==": [
+                    { "var": "attack.response.body" },
+                    { "var": "original.response.body" }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "jwt_2",
+          "name": "JWT None Algorithm (Form body param)",
+          "atomic": false,
+          "description": "Replace JWT present in x-www-form-urlencoded body params.",
+          "condition": {
+            "and": [
+              { "==": [{ "var": "original.response.statusCode" }, 200] },
+              {
+                "regex": [
+                  { "var": "original.request.body.params" },
+                  { "var": "attack.metadata.regex" }
+                ]
+              }
+            ]
+          },
+          "action": {
+            "params": [
+              {
+                "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.$2.",
+                "regex": "(ey[a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_=]+)\\.([A-Za-z0-9_-]{2,})"
+              }
+            ]
+          },
+          "validation": {
+            "rule": {
+              "and": [
+                { "==": [{ "var": "attack.response.statusCode" }, 200] },
+                {
+                  "==": [
+                    { "var": "attack.response.body" },
+                    { "var": "original.response.body" }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "jwt_3",
+          "name": "JWT None Algorithm (Authorization header)",
+          "atomic": false,
+          "description": "Replace JWT in Authorization: Bearer <token> header.",
+          "condition": {
+            "and": [
+              { "==": [{ "var": "original.response.statusCode" }, 200] },
+              {
+                "regex": [
+                  {
+                    "filter": [
+                      { "var": "original.request.headers" },
+                      {
+                        "in": [
+                          { "var": "name" },
+                          ["Authorization", "authorization"]
+                        ]
+                      }
+                    ]
+                  },
+                  { "var": "attack.metadata.regex" }
+                ]
+              }
+            ]
+          },
+          "action": {
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.$2.",
+                "regex": "(ey[a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_=]+)\\.([A-Za-z0-9_-]{2,})"
+              }
+            ]
+          },
+          "validation": {
+            "rule": {
+              "and": [
+                { "==": [{ "var": "attack.response.statusCode" }, 200] },
+                {
+                  "==": [
+                    { "var": "attack.response.body" },
+                    { "var": "original.response.body" }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "jwt_4",
+          "name": "JWT None Algorithm (JSON body)",
+          "atomic": false,
+          "description": "Replace JWT inside any JSON body leaf value.",
+          "condition": {
+            "and": [
+              { "==": [{ "var": "original.response.statusCode" }, 200] },
+              {
+                "or": [
+                  {
+                    "regex": [
+                      { "var": "original.request.body.text" },
+                      { "var": "attack.metadata.regex" }
+                    ]
+                  },
+                  {
+                    "regex": [
+                      { "var": "original.request.body.json" },
+                      { "var": "attack.metadata.regex" }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "action": {
+            "params": [
+              {
+                "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.$2.",
+                "regex": "(ey[a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_=]+)\\.([A-Za-z0-9_-]{2,})"
+              }
+            ]
+          },
+          "validation": {
+            "rule": {
+              "and": [
+                { "==": [{ "var": "attack.response.statusCode" }, 200] },
+                {
+                  "==": [
+                    { "var": "attack.response.body" },
+                    { "var": "original.response.body" }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "vulnId": "jwt_misuse"
+    },
+    {
+      "id": "version_control_exposure",
+      "type": "active",
+      "async": true,
+      "name": "Exposure of Version-Control Repository",
+      "metadata": {
+        "description": "Version control repositories such as CVS or git store version-specific metadata and other details within subdirectories. If these subdirectories are stored on a web server or added to an archive, then these could be used by an attacker. This information may include usernames, filenames, path root, IP addresses, and detailed 'diff' data about how files have been changed - which could reveal source code snippets that were never intended to be made public..",
+        "recommendation": "<p>Recommendations include removing any version control directories and repositories from the production server, disabling the use of remote version control repositories, and ensuring that the latest version control patches and version updates have been performed.</p>",
+        "links": {
+          "OWASP": "https://owasp.org/Top10/A05_2021-Security_Misconfiguration/",
+          "CWE": "https://cwe.mitre.org/data/definitions/527.html"
+        },
+        "severity": "medium",
+        "unique": true,
+        "category": "source_exposure",
+        "owasp": "A05:2021-Security Misconfiguration",
+        "cwe": "CWE-527",
+        "tags": ["dast", "info_leakage", "vcs"]
+      },
+      "attacks": [
+        {
+          "id": "repo_1",
+          "name": "Exposure of Git repository",
+          "regex": "Index of \\/.git",
+          "action": {
+            "url": {
+              "value": "/.git/",
+              "position": "after",
+              "operation": "add"
+            }
+          },
+          "validation": {
+            "rule": {
+              "and": [
+                { "==": [{ "var": "attack.response.statusCode" }, 200] },
+                {
+                  "regex": [
+                    { "var": "attack.response.body" },
+                    { "var": "attack.metadata.regex" }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "repo_2",
+          "name": "Exposure of SVN repository",
+          "regex": "Index of \\/.svn",
+          "action": {
+            "url": {
+              "value": "/.svn/",
+              "position": "after",
+              "operation": "add"
+            }
+          },
+          "validation": {
+            "rule": {
+              "and": [
+                { "==": [{ "var": "attack.response.statusCode" }, 200] },
+                {
+                  "regex": [
+                    { "var": "attack.response.body" },
+                    { "var": "attack.metadata.regex" }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "repo_3",
+          "name": "Exposure of Mercurial repository",
+          "regex": "Index of \\/.hg",
+          "action": {
+            "url": { "value": "/.hg/", "position": "after", "operation": "add" }
+          },
+          "validation": {
+            "rule": {
+              "and": [
+                { "==": [{ "var": "attack.response.statusCode" }, 200] },
+                {
+                  "regex": [
+                    { "var": "attack.response.body" },
+                    { "var": "attack.metadata.regex" }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "vulnId": "version_control_exposure"
+    },
+    {
+      "id": "headers",
+      "type": "passive",
+      "name": "OWASP Secure Headers",
+      "metadata": {
+        "description": "The OWASP Secure Headers Project describes HTTP response headers that your application can use to increase the security of your application. Once set, these HTTP response headers can restrict modern browsers from running into easily preventable vulnerabilities. ",
+        "recommendation": "<p>Configure security-related HTTP response headers consistently on all responses to harden the application against common browser-based attacks.</p>\n<ul>\n  <li><strong>HSTS</strong> – enforce HTTPS with a long <code>max-age</code> and <code>includeSubDomains</code> where appropriate.</li>\n  <li><strong>Content-Security-Policy</strong> – restrict scripts, styles, frames and connections to trusted sources only.</li>\n  <li><strong>Referrer-Policy</strong> – limit referrer information sent to other origins.</li>\n  <li><strong>X-Content-Type-Options</strong> – use <code>nosniff</code> to prevent MIME type confusion.</li>\n  <li><strong>Cookies</strong> – set <code>Secure</code>, <code>HttpOnly</code> and <code>SameSite</code> attributes on sensitive cookies.</li>\n  <li>Remove unnecessary disclosure headers such as <code>Server</code> and <code>X-Powered-By</code> where possible.</li>\n</ul>",
+        "links": {
+          "OWASP": "https://owasp.org/www-project-secure-headers/",
+          "CWE": "https://cwe.mitre.org/data/definitions/693.html"
+        },
+        "severity": "low",
+        "unique": false,
+        "category": "security_headers",
+        "owasp": "A05:2021-Security Misconfiguration",
+        "cwe": "CWE-693",
+        "tags": ["dast", "hardening", "headers"]
+      },
+      "attacks": [
+        {
+          "id": "header_csp_missing",
+          "name": "Missing Content-Security-Policy header",
+          "validation": {
+            "rule": {
+              "none": [
+                { "var": "original.response.headers" },
+                {
+                  "regex": [{ "var": "name" }, "^content-security-policy$", "i"]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_csp_weak_scripts",
+          "name": "CSP allows inline/eval or wildcards in script/style",
+          "validation": {
+            "rule": {
+              "some": [
+                { "var": "original.response.headers" },
+                {
+                  "and": [
+                    {
+                      "regex": [
+                        { "var": "name" },
+                        "^content-security-policy$",
+                        "i"
+                      ]
+                    },
+                    {
+                      "or": [
+                        {
+                          "regex": [{ "var": "value" }, "'unsafe-inline'", "i"]
+                        },
+                        { "regex": [{ "var": "value" }, "'unsafe-eval'", "i"] },
+                        {
+                          "regex": [
+                            { "var": "value" },
+                            "script-src[^;]*\\*",
+                            "i"
+                          ]
+                        },
+                        {
+                          "regex": [
+                            { "var": "value" },
+                            "style-src[^;]*\\*",
+                            "i"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_csp_frame_ancestors_missing_or_weak",
+          "name": "CSP 'frame-ancestors' missing or overly broad",
+          "validation": {
+            "rule": {
+              "some": [
+                { "var": "original.response.headers" },
+                {
+                  "and": [
+                    {
+                      "regex": [
+                        { "var": "name" },
+                        "^content-security-policy$",
+                        "i"
+                      ]
+                    },
+                    {
+                      "or": [
+                        {
+                          "!": {
+                            "regex": [
+                              { "var": "value" },
+                              "frame-ancestors",
+                              "i"
+                            ]
+                          }
+                        },
+                        {
+                          "regex": [
+                            { "var": "value" },
+                            "frame-ancestors[^;]*\\*",
+                            "i"
+                          ]
+                        },
+                        {
+                          "regex": [
+                            { "var": "value" },
+                            "frame-ancestors[^;]*https?://",
+                            "i"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_csp_report_only_without_enforce",
+          "name": "CSP Report-Only present without enforcing CSP",
+          "validation": {
+            "rule": {
+              "and": [
+                {
+                  "some": [
+                    { "var": "original.response.headers" },
+                    {
+                      "regex": [
+                        { "var": "name" },
+                        "^content-security-policy-report-only$",
+                        "i"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "none": [
+                    { "var": "original.response.headers" },
+                    {
+                      "regex": [
+                        { "var": "name" },
+                        "^content-security-policy$",
+                        "i"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_hsts_missing",
+          "name": "Missing Strict-Transport-Security header (on HTTPS)",
+          "validation": {
+            "rule": {
+              "and": [
+                { "var": "original.response.isHttps" },
+                {
+                  "none": [
+                    { "var": "original.response.headers" },
+                    {
+                      "regex": [
+                        { "var": "name" },
+                        "^strict-transport-security$",
+                        "i"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_hsts_ineffective_on_http",
+          "name": "Strict-Transport-Security sent over HTTP (ineffective)",
+          "validation": {
+            "rule": {
+              "and": [
+                { "!": { "var": "original.response.isHttps" } },
+                {
+                  "some": [
+                    { "var": "original.response.headers" },
+                    {
+                      "regex": [
+                        { "var": "name" },
+                        "^strict-transport-security$",
+                        "i"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_hsts_weak",
+          "name": "HSTS max-age too low or missing includeSubDomains",
+          "validation": {
+            "rule": {
+              "some": [
+                { "var": "original.response.headers" },
+                {
+                  "and": [
+                    {
+                      "regex": [
+                        { "var": "name" },
+                        "^strict-transport-security$",
+                        "i"
+                      ]
+                    },
+                    {
+                      "or": [
+                        {
+                          "!": {
+                            "regex": [
+                              { "var": "value" },
+                              "max-age\\s*=\\s*(\\d+)",
+                              "i"
+                            ]
+                          }
+                        },
+                        {
+                          "and": [
+                            {
+                              "regex": [
+                                { "var": "value" },
+                                "max-age\\s*=\\s*(\\d+)",
+                                "i",
+                                "hstsAge"
+                              ]
+                            },
+                            { "<": [{ "var": "captures.hstsAge.1" }, 15552000] }
+                          ]
+                        },
+                        {
+                          "!": {
+                            "regex": [
+                              { "var": "value" },
+                              "includesubdomains",
+                              "i"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_powered_by_present",
+          "name": "X-Powered-By header or equivalent present",
+          "validation": {
+            "rule": {
+              "some": [
+                { "var": "original.response.headers" },
+                {
+                  "regex": [
+                    { "var": "name" },
+                    "^(x-(server-)?powered-(by|cms)|powered-by|x-cf-powered-by)$",
+                    "i"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_server_banner_disclosure",
+          "name": "Server banner discloses software/version",
+          "validation": {
+            "rule": {
+              "some": [
+                { "var": "original.response.headers" },
+                {
+                  "and": [
+                    { "regex": [{ "var": "name" }, "^server$", "i"] },
+                    {
+                      "regex": [
+                        { "var": "value" },
+                        "\\/\\d|apache|nginx|iis|tomcat|gunicorn|caddy|lighttpd|express|kestrel",
+                        "i"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_x_frame_options_obsolete",
+          "name": "X-Frame-Options header is a legacy directive",
+          "validation": {
+            "rule": {
+              "some": [
+                { "var": "original.response.headers" },
+                { "regex": [{ "var": "name" }, "^x-frame-options$", "i"] }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_xss_protection_obsolete",
+          "name": "X-XSS-Protection header is a legacy directive",
+          "validation": {
+            "rule": {
+              "some": [
+                { "var": "original.response.headers" },
+                { "regex": [{ "var": "name" }, "^x-xss-protection$", "i"] }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_expect_ct_obsolete",
+          "name": "Expect-CT is deprecated",
+          "validation": {
+            "rule": {
+              "some": [
+                { "var": "original.response.headers" },
+                { "regex": [{ "var": "name" }, "^expect-ct$", "i"] }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_coop_without_coep_or_corp",
+          "name": "COOP set without COEP/CORP (incomplete cross-origin isolation)",
+          "validation": {
+            "rule": {
+              "and": [
+                {
+                  "some": [
+                    { "var": "original.response.headers" },
+                    {
+                      "regex": [
+                        { "var": "name" },
+                        "^cross-origin-opener-policy$",
+                        "i"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "none": [
+                    { "var": "original.response.headers" },
+                    {
+                      "regex": [
+                        { "var": "name" },
+                        "^cross-origin-embedder-policy$",
+                        "i"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "none": [
+                    { "var": "original.response.headers" },
+                    {
+                      "regex": [
+                        { "var": "name" },
+                        "^cross-origin-resource-policy$",
+                        "i"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_coep_value_weak",
+          "name": "COEP present but value is not 'require-corp' or 'credentialless'",
+          "validation": {
+            "rule": {
+              "some": [
+                { "var": "original.response.headers" },
+                {
+                  "and": [
+                    {
+                      "regex": [
+                        { "var": "name" },
+                        "^cross-origin-embedder-policy$",
+                        "i"
+                      ]
+                    },
+                    {
+                      "!": {
+                        "regex": [
+                          { "var": "value" },
+                          "^(\\s*require-corp\\s*|\\s*credentialless\\s*)$",
+                          "i"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_permissions_policy_legacy_or_unknown",
+          "name": "Deprecated Feature-Policy or unknown/overly-permissive Permissions-Policy",
+          "validation": {
+            "rule": {
+              "or": [
+                {
+                  "some": [
+                    { "var": "original.response.headers" },
+                    { "regex": [{ "var": "name" }, "^feature-policy$", "i"] }
+                  ]
+                },
+                {
+                  "some": [
+                    { "var": "original.response.headers" },
+                    {
+                      "and": [
+                        {
+                          "regex": [
+                            { "var": "name" },
+                            "^permissions-policy$",
+                            "i"
+                          ]
+                        },
+                        {
+                          "or": [
+                            {
+                              "regex": [
+                                { "var": "value" },
+                                "(?<![a-z-])(vibrate|document-write|interest-cohort)\\s*=",
+                                "i"
+                              ]
+                            },
+                            {
+                              "regex": [
+                                { "var": "value" },
+                                "geolocation\\s*=\\s*\\*",
+                                "i"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_referrer_policy_missing_or_weak",
+          "name": "Missing or weak Referrer-Policy",
+          "validation": {
+            "rule": {
+              "or": [
+                {
+                  "none": [
+                    { "var": "original.response.headers" },
+                    { "regex": [{ "var": "name" }, "^referrer-policy$", "i"] }
+                  ]
+                },
+                {
+                  "some": [
+                    { "var": "original.response.headers" },
+                    {
+                      "and": [
+                        {
+                          "regex": [{ "var": "name" }, "^referrer-policy$", "i"]
+                        },
+                        {
+                          "regex": [
+                            { "var": "value" },
+                            "^(\\s*|no-referrer-when-downgrade|unsafe-url)\\s*$",
+                            "i"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_clear_site_data_incomplete",
+          "name": "Clear-Site-Data present but missing executionContexts",
+          "validation": {
+            "rule": {
+              "some": [
+                { "var": "original.response.headers" },
+                {
+                  "and": [
+                    { "regex": [{ "var": "name" }, "^clear-site-data$", "i"] },
+                    {
+                      "!": {
+                        "regex": [
+                          { "var": "value" },
+                          "\"?executioncontexts\"?",
+                          "i"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_clear_site_data_wildcard",
+          "name": "Clear-Site-Data uses wildcard *",
+          "validation": {
+            "rule": {
+              "some": [
+                { "var": "original.response.headers" },
+                {
+                  "and": [
+                    { "regex": [{ "var": "name" }, "^clear-site-data$", "i"] },
+                    { "regex": [{ "var": "value" }, "\\*", "i"] }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_cors_wildcard_with_credentials",
+          "name": "CORS allows any origin with credentials",
+          "validation": {
+            "rule": {
+              "and": [
+                {
+                  "some": [
+                    { "var": "original.response.headers" },
+                    {
+                      "and": [
+                        {
+                          "regex": [
+                            { "var": "name" },
+                            "^access-control-allow-origin$",
+                            "i"
+                          ]
+                        },
+                        { "regex": [{ "var": "value" }, "^\\s*\\*\\s*$", "i"] }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "some": [
+                    { "var": "original.response.headers" },
+                    {
+                      "and": [
+                        {
+                          "regex": [
+                            { "var": "name" },
+                            "^access-control-allow-credentials$",
+                            "i"
+                          ]
+                        },
+                        { "regex": [{ "var": "value" }, "true", "i"] }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_set_cookie_flags_missing",
+          "name": "Sensitive cookies missing security flags",
+          "validation": {
+            "rule": {
+              "some": [
+                { "var": "original.response.headers" },
+                {
+                  "and": [
+                    { "regex": [{ "var": "name" }, "^set-cookie$", "i"] },
+                    {
+                      "or": [
+                        {
+                          "!": {
+                            "regex": [
+                              { "var": "value" },
+                              ";\\s*httponly\b",
+                              "i"
+                            ]
+                          }
+                        },
+                        {
+                          "and": [
+                            { "var": "original.response.isHttps" },
+                            {
+                              "!": {
+                                "regex": [
+                                  { "var": "value" },
+                                  ";\\s*secure\b",
+                                  "i"
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "!": {
+                            "regex": [
+                              { "var": "value" },
+                              ";\\s*samesite\\s*=\\s*(lax|strict)",
+                              "i"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "header_cache_control_sensitive_missing_no_store",
+          "name": "Potentially authenticated content lacks no-store",
+          "validation": {
+            "rule": {
+              "and": [
+                {
+                  "some": [
+                    { "var": "original.response.headers" },
+                    { "regex": [{ "var": "name" }, "^set-cookie$", "i"] }
+                  ]
+                },
+                {
+                  "none": [
+                    { "var": "original.response.headers" },
+                    {
+                      "and": [
+                        {
+                          "regex": [{ "var": "name" }, "^cache-control$", "i"]
+                        },
+                        { "regex": [{ "var": "value" }, "\bno-store\b", "i"] }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "vulnId": "security_headers"
+    }
+  ]
+}
