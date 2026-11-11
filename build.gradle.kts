@@ -49,9 +49,11 @@ zapAddOn {
                     register("automation")
                 }
                 register("commonlib")
-                register("selenium")
+                register("selenium") {
+                    version.set(">=15.61.0")
+                }
                 register("client") {
-                    version.set(">=0.28.0")
+                    version.set(">=0.35.0")
                 }
             }
         }
